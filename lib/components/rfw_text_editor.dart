@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
@@ -45,6 +46,14 @@ class _RfwTextEditor extends State<RfwTextEditor> {
   static const LibraryName materialName =
       LibraryName(<String>['material', 'widgets']);
   static const LibraryName mainName = LibraryName(<String>['main']);
+  static const String _initialRfwData = '''
+   {
+    "greet": {
+      "name": "World!"
+     },
+    "list": ["a", "b", "c", "d", "e"]
+   }
+  ''';
   static const String _initialRfwText = '''
     // The "import" keyword is used to specify dependencies, in this case,
     // the built-in widgets that are added by initState below.
@@ -82,6 +91,10 @@ class _RfwTextEditor extends State<RfwTextEditor> {
     text: _initialRfwText,
     language: dart,
   );
+  final CodeController _rfwDataController = CodeController(
+    text: _initialRfwData,
+    language: dart,
+  );
 
   Object? _latestRfwError;
 
@@ -114,6 +127,19 @@ class _RfwTextEditor extends State<RfwTextEditor> {
       _runtime.update(
           mainName, parseLibraryFile(rfwText, sourceIdentifier: rfwText));
       _rfwText = rfwText;
+    } catch (e) {
+      rfwError = e;
+    } finally {
+      setState(() {
+        _latestRfwError = rfwError;
+      });
+    }
+  }
+
+  void _onRfwDataChanged(String rfwData) {
+    Object? rfwError;
+    try {
+      _data.updateAll(jsonDecode(rfwData));
     } catch (e) {
       rfwError = e;
     } finally {
@@ -168,6 +194,7 @@ class _RfwTextEditor extends State<RfwTextEditor> {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
+      // RFW code.
       Container(
         decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
         child: SizedBox(
@@ -183,6 +210,25 @@ class _RfwTextEditor extends State<RfwTextEditor> {
           ),
         ),
       ),
+
+      /// RFW data.
+      Container(
+        decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
+        child: SizedBox(
+          width: 800,
+          height: double.infinity,
+          child: CodeField(
+            controller: _rfwDataController,
+            textStyle: const TextStyle(fontFamily: 'SourceCode'),
+            minLines: null,
+            maxLines: null,
+            expands: true,
+            onChanged: _onRfwDataChanged,
+          ),
+        ),
+      ),
+
+      // RFW UI.
       Expanded(
         child: MouseRegion(
             onHover: _onHover,

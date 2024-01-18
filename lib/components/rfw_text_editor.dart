@@ -10,6 +10,8 @@ import 'package:code_text_field/code_text_field.dart';
 
 import 'package:highlight/languages/dart.dart';
 
+import '../infra/rfw_event.dart';
+
 class RfwTextEditor extends StatefulWidget {
   const RfwTextEditor({super.key});
 
@@ -46,6 +48,7 @@ class _RfwTextEditor extends State<RfwTextEditor> {
   static const LibraryName materialName =
       LibraryName(<String>['material', 'widgets']);
   static const LibraryName mainName = LibraryName(<String>['main']);
+  static const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
   static const String _initialRfwData = '''
    {
     "greet": {
@@ -95,6 +98,7 @@ class _RfwTextEditor extends State<RfwTextEditor> {
     text: _initialRfwData,
     language: dart,
   );
+  final List<RfwEvent> _rfwEvents = <RfwEvent>[];
 
   Object? _latestRfwError;
 
@@ -150,7 +154,9 @@ class _RfwTextEditor extends State<RfwTextEditor> {
   }
 
   void _onRfwEvent(String name, DynamicMap arguments) {
-    print('user triggered event "$name" with data: $arguments');
+    setState(() {
+      _rfwEvents.add(RfwEvent(name, arguments));
+    });
   }
 
   void _onHover(PointerHoverEvent event) {
@@ -227,6 +233,30 @@ class _RfwTextEditor extends State<RfwTextEditor> {
           ),
         ),
       ),
+
+      /// RFW events.
+      if (_rfwEvents.isNotEmpty)
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blueAccent),
+          ),
+          child: Container(
+            width: 800,
+            height: double.infinity,
+            child: ListView.builder(
+              itemCount: _rfwEvents.length,
+              itemBuilder: (context, index) {
+                final event = _rfwEvents[index];
+                final name = event.name;
+                final arguments = event.arguments;
+                return ExpansionTile(
+                  title: Text('Event: $name'),
+                  children: [Text(_jsonEncoder.convert(arguments))],
+                );
+              },
+            ),
+          ),
+        ),
 
       // RFW UI.
       Expanded(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rfwpg/components/rfw_text_editor.dart';
+import 'package:rfwpg/components/rfw_pad.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,7 +10,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('RFW Playground'),
       ),
-      body: RfwTextEditor(),
+      body: RfwPad(),
     );
   }
 }

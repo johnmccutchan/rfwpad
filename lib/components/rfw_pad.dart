@@ -1,49 +1,24 @@
 import 'dart:convert';
+
+import 'package:flutter_resizable_container/flutter_resizable_container.dart';
+import 'package:code_text_field/code_text_field.dart';
+import 'package:code_text_field/code_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-
+import 'package:highlight/languages/dart.dart';
 import 'package:rfw/formats.dart';
 import 'package:rfw/rfw.dart';
 
-import 'package:code_text_field/code_text_field.dart';
-import 'package:code_text_field/code_text_field.dart';
-
-import 'package:highlight/languages/dart.dart';
-
 import '../infra/rfw_event.dart';
 
-class RfwTextEditor extends StatefulWidget {
-  const RfwTextEditor({super.key});
+class RfwPad extends StatefulWidget {
+  const RfwPad({super.key});
 
   @override
-  State<RfwTextEditor> createState() => _RfwTextEditor();
+  State<RfwPad> createState() => _RfwPad();
 }
 
-(int, int) lineCol(SourceLocation l) {
-  final source = l.source;
-  int line = -1;
-  int column = -1;
-  if ((source is String)) {
-    line = 1;
-    column = 0;
-    int offset = 0;
-    for (final ch in source.characters) {
-      if (ch == '\n') {
-        line++;
-        column = 0;
-      } else {
-        column++;
-      }
-      if (offset == l.offset) {
-        return (line, column);
-      }
-      offset++;
-    }
-  }
-  return (line, column);
-}
-
-class _RfwTextEditor extends State<RfwTextEditor> {
+class _RfwPad extends State<RfwPad> {
   static const LibraryName coreName = LibraryName(<String>['core', 'widgets']);
   static const LibraryName materialName =
       LibraryName(<String>['material', 'widgets']);
@@ -162,6 +137,7 @@ class _RfwTextEditor extends State<RfwTextEditor> {
   void _onHover(PointerHoverEvent event) {
     final view = WidgetsFlutterBinding.ensureInitialized().renderViews.first;
     final hitTestResult = HitTestResult();
+
     if (view.hitTest(hitTestResult, position: event.position)) {
       SourceRange? loc;
       for (final segment in hitTestResult.path) {
@@ -191,7 +167,9 @@ class _RfwTextEditor extends State<RfwTextEditor> {
         setState(() {
           _hoverRange = loc;
           _codeController.selection = TextSelection(
-              baseOffset: loc!.start.offset, extentOffset: loc!.end.offset);
+            baseOffset: loc!.start.offset,
+            extentOffset: loc!.end.offset,
+          );
         });
       }
     }
@@ -199,78 +177,86 @@ class _RfwTextEditor extends State<RfwTextEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      // RFW code.
-      Container(
-        decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
-        child: SizedBox(
-          width: 800,
-          height: double.infinity,
-          child: CodeField(
-            controller: _codeController,
-            textStyle: const TextStyle(fontFamily: 'SourceCode'),
-            minLines: null,
-            maxLines: null,
-            expands: true,
-            onChanged: _onRfwTextChanged,
-          ),
-        ),
-      ),
-
-      /// RFW data.
-      Container(
-        decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
-        child: SizedBox(
-          width: 800,
-          height: double.infinity,
-          child: CodeField(
-            controller: _rfwDataController,
-            textStyle: const TextStyle(fontFamily: 'SourceCode'),
-            minLines: null,
-            maxLines: null,
-            expands: true,
-            onChanged: _onRfwDataChanged,
-          ),
-        ),
-      ),
-
-      /// RFW events.
-      if (_rfwEvents.isNotEmpty)
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.blueAccent),
-          ),
-          child: Container(
-            width: 800,
-            height: double.infinity,
-            child: ListView.builder(
-              itemCount: _rfwEvents.length,
-              itemBuilder: (context, index) {
-                final event = _rfwEvents[index];
-                final name = event.name;
-                final arguments = event.arguments;
-                return ExpansionTile(
-                  title: Text('Event: $name'),
-                  children: [Text(_jsonEncoder.convert(arguments))],
-                );
-              },
+    return Scaffold(
+      body: ResizableContainer(
+        direction: Axis.horizontal,
+        children: [
+          ResizableChildData(
+            startingRatio: 0.3,
+            child: ResizableContainer(
+              direction: Axis.vertical,
+              children: [
+                ResizableChildData(
+                  startingRatio: 0.7,
+                  child: _rfwTextEditor,
+                ),
+                ResizableChildData(
+                  startingRatio: 0.3,
+                  child: _rfwDataEditor,
+                ),
+              ],
             ),
           ),
-        ),
-
-      // RFW UI.
-      Expanded(
-        child: MouseRegion(
-            onHover: _onHover,
-            child: _latestRfwError == null
-                ? RemoteWidget(
-                    runtime: _runtime,
-                    data: _data,
-                    widget: const FullyQualifiedWidgetName(mainName, 'root'),
-                    onEvent: _onRfwEvent,
-                  )
-                : ErrorWidget(_latestRfwError!)),
+          ResizableChildData(
+            startingRatio: 0.7,
+            child: ResizableContainer(
+              direction: Axis.vertical,
+              children: [
+                ResizableChildData(
+                  startingRatio: 0.8,
+                  child: _rfwApp,
+                ),
+                ResizableChildData(
+                  startingRatio: 0.2,
+                  child: _rfwEventsInspector,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-    ]);
+    );
   }
+
+  Widget get _rfwTextEditor => CodeField(
+        controller: _codeController,
+        textStyle: const TextStyle(fontFamily: 'SourceCode'),
+        minLines: null,
+        maxLines: null,
+        expands: true,
+        onChanged: _onRfwTextChanged,
+      );
+
+  Widget get _rfwDataEditor => CodeField(
+        controller: _rfwDataController,
+        textStyle: const TextStyle(fontFamily: 'SourceCode'),
+        minLines: null,
+        maxLines: null,
+        expands: true,
+        onChanged: _onRfwDataChanged,
+      );
+
+  Widget get _rfwEventsInspector => ListView.builder(
+        itemCount: _rfwEvents.length,
+        itemBuilder: (context, index) {
+          // Reverse order.
+          final event = _rfwEvents[_rfwEvents.length - 1 - index];
+          final name = event.name;
+          final arguments = event.arguments;
+          return ExpansionTile(
+            title: Text('Event: $name'),
+            children: [Text(_jsonEncoder.convert(arguments))],
+          );
+        },
+      );
+
+  Widget get _rfwApp => MouseRegion(
+        onHover: _onHover,
+        child: RemoteWidget(
+          runtime: _runtime,
+          data: _data,
+          widget: const FullyQualifiedWidgetName(mainName, 'root'),
+          onEvent: _onRfwEvent,
+        ),
+      );
 }

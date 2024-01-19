@@ -143,7 +143,7 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   Object? _latestRfwTextError;
-  void _onRfwTextChanged(String rfwText) {
+  void _onRfwTextChanged(BuildContext context, String rfwText) {
     Object? rfwTextError;
     try {
       _runtime.update(
@@ -151,6 +151,7 @@ class _HomeScreen extends State<HomeScreen> {
       _rfwText = rfwText;
     } catch (e) {
       rfwTextError = e;
+      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar('rfw text', e));
     } finally {
       setState(() {
         _latestRfwTextError = rfwTextError;
@@ -159,18 +160,27 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   Object? _latestRfwDataError = null;
-  void _onRfwDataChanged(String rfwData) {
+  void _onRfwDataChanged(BuildContext context, String rfwData) {
     Object? rfwDataError;
     try {
       _data.updateAll(jsonDecode(rfwData));
     } catch (e) {
       rfwDataError = e;
+      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar('data', e));
     } finally {
       setState(() {
         _latestRfwDataError = rfwDataError;
       });
     }
   }
+
+  SnackBar _errorSnackBar(String what, Object error) => SnackBar(
+        content: Text(
+          'There was an error parsing the $what: $error',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.red,
+      );
 
   void _onRfwEvent(String name, DynamicMap arguments) {
     setState(() {
@@ -260,8 +270,8 @@ class _HomeScreen extends State<HomeScreen> {
         children: [
           Expanded(
             child: Column(children: [
-              Expanded(child: _rfwTextEditor),
-              if (_showData) Expanded(child: _rfwDataEditor),
+              Expanded(child: _rfwTextEditor(context)),
+              if (_showData) Expanded(child: _rfwDataEditor(context)),
             ]),
           ),
           Expanded(
@@ -275,13 +285,15 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
-  Widget get _rfwTextEditor => _textEditor(
+  Widget _rfwTextEditor(BuildContext context) => _textEditor(
+        context,
         _codeController,
         _onRfwTextChanged,
         _latestRfwTextError,
       );
 
-  Widget get _rfwDataEditor => _textEditor(
+  Widget _rfwDataEditor(BuildContext context) => _textEditor(
+        context,
         _rfwDataController,
         _onRfwDataChanged,
         _latestRfwDataError,
@@ -317,8 +329,9 @@ class _HomeScreen extends State<HomeScreen> {
       );
 
   Widget _textEditor(
+    BuildContext context,
     CodeController controller,
-    Function(String) onChanged,
+    Function(BuildContext, String) onChanged,
     Object? error,
   ) =>
       CodeTheme(
@@ -336,7 +349,7 @@ class _HomeScreen extends State<HomeScreen> {
           minLines: null,
           maxLines: null,
           expands: true,
-          onChanged: onChanged,
+          onChanged: (value) => onChanged(context, value),
         ),
       );
 }

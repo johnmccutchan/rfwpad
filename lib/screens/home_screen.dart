@@ -4,6 +4,8 @@ import 'package:code_text_field/code_text_field.dart';
 import 'package:code_text_field/code_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_highlight/themes/solarized-light.dart';
+import 'package:flutter_highlight/themes/solarized-dark.dart';
 import 'package:highlight/languages/dart.dart';
 import 'package:rfw/formats.dart';
 import 'package:rfw/rfw.dart';
@@ -11,7 +13,9 @@ import 'package:rfw/rfw.dart';
 import '../infra/rfw_event.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.toggleTheme});
+
+  final void Function() toggleTheme;
 
   @override
   State<HomeScreen> createState() => _HomeScreen();
@@ -176,22 +180,32 @@ class _HomeScreen extends State<HomeScreen> {
 
   bool _showEvents = false;
   bool _showData = false;
+  bool _lightMode = true;
 
   @override
   Widget build(BuildContext context) {
+    _lightMode = Theme.of(context).brightness == Brightness.light;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('RFW Playground'),
         actions: [
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
+            child: IconButton(
+              onPressed: widget.toggleTheme,
+              icon: Icon(_lightMode ? Icons.dark_mode : Icons.light_mode),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(10),
             child: OutlinedButton(
               onPressed: () => setState(() => _showData = !_showData),
               child: _showData ? Text('Hide data') : Text('Show data'),
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
             child: OutlinedButton(
               onPressed: _rfwEvents.isEmpty
                   ? null
@@ -220,22 +234,14 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
-  Widget get _rfwTextEditor => CodeField(
-        controller: _codeController,
-        textStyle: const TextStyle(fontFamily: 'SourceCode'),
-        minLines: null,
-        maxLines: null,
-        expands: true,
-        onChanged: _onRfwTextChanged,
+  Widget get _rfwTextEditor => _textEditor(
+        _codeController,
+        _onRfwTextChanged,
       );
 
-  Widget get _rfwDataEditor => CodeField(
-        controller: _rfwDataController,
-        textStyle: const TextStyle(fontFamily: 'SourceCode'),
-        minLines: null,
-        maxLines: null,
-        expands: true,
-        onChanged: _onRfwDataChanged,
+  Widget get _rfwDataEditor => _textEditor(
+        _rfwDataController,
+        _onRfwDataChanged,
       );
 
   Widget get _rfwEventsInspector => ListView.builder(
@@ -258,6 +264,21 @@ class _HomeScreen extends State<HomeScreen> {
           data: _data,
           widget: const FullyQualifiedWidgetName(mainName, 'root'),
           onEvent: _onRfwEvent,
+        ),
+      );
+
+  Widget _textEditor(CodeController controller, Function(String) onChanged) =>
+      CodeTheme(
+        data: CodeThemeData(
+          styles: _lightMode ? solarizedLightTheme : solarizedDarkTheme,
+        ),
+        child: CodeField(
+          controller: controller,
+          textStyle: const TextStyle(fontFamily: 'SourceCode'),
+          minLines: null,
+          maxLines: null,
+          expands: true,
+          onChanged: onChanged,
         ),
       );
 }

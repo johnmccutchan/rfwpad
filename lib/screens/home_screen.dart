@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:code_text_field/code_text_field.dart';
-import 'package:code_text_field/code_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_highlight/themes/solarized-light.dart';
@@ -10,6 +9,7 @@ import 'package:highlight/languages/dart.dart';
 import 'package:rfw/formats.dart';
 import 'package:rfw/rfw.dart';
 
+import '../widgets/tree.dart';
 import '../infra/rfw_event.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -137,9 +137,9 @@ class _HomeScreen extends State<HomeScreen> {
       ..update(
           mainName, parseLibraryFile(_rfwText, sourceIdentifier: _rfwText));
 
-    _initialRfwData.keys.forEach(
-      (key) => _data.update(key, _initialRfwData[key]!),
-    );
+    for (final key in _initialRfwData.keys) {
+      _data.update(key, _initialRfwData[key]!);
+    }
   }
 
   @override
@@ -165,7 +165,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
   }
 
-  Object? _latestRfwDataError = null;
+  Object? _latestRfwDataError;
   void _onRfwDataChanged(BuildContext context, String rfwData) {
     Object? rfwDataError;
     try {
@@ -244,8 +244,9 @@ class _HomeScreen extends State<HomeScreen> {
     _lightMode = Theme.of(context).brightness == Brightness.light;
 
     return Scaffold(
+      drawer: Drawer(width: 400, child: RFWTreeView(runtime: _runtime)),
       appBar: AppBar(
-        title: Text('RFW Playground'),
+        title: Text('rfw dbg'),
         actions: [
           Padding(
             padding: EdgeInsets.all(10),

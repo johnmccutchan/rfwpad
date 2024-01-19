@@ -73,15 +73,15 @@ class _HomeScreen extends State<HomeScreen> {
     widget Title = Text(
       text: args.title,
       style: {
-         fontSize: 24,
+         fontSize: 20,
          fontWeight: 'bold',
       },
     );
 
-    widget Space = SizedBox(height: 40);
+    widget Space = SizedBox(height: 30);
 
     widget FavoriteCities = Row(
-      mainAxisAlignment: 'spaceBetween',
+      mainAxisAlignment: 'center',
       children: [
         ...for city in args.cities:
           City(name: city.name, image: city.image), 
@@ -91,13 +91,19 @@ class _HomeScreen extends State<HomeScreen> {
     widget City = Column(
       children: [
          CityName(name: args.name),
-         Image(source: args.image),
+         Space(),
+         Image(source: args.image, width: 300),
          Space(),
          LikeButton(city: args.name),
       ],
     );
 
-    widget CityName = Text(text: args.name);
+    widget CityName = Text(
+      text: args.name,
+      style: {
+        fontSize: 14,
+      },
+    );
 
     widget LikeButton = ElevatedButton(
       child: Text(text: ["I like ", args.city]),

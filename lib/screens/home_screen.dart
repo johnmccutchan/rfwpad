@@ -92,7 +92,7 @@ class _HomeScreen extends State<HomeScreen> {
       children: [
          CityName(name: args.name),
          Space(),
-         Image(source: args.image, width: 300, height: 300),
+         Image(source: args.image, width: 300.0, height: 300.0),
          Space(),
          LikeButton(city: args.name),
       ],

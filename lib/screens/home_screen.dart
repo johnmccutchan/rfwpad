@@ -243,26 +243,32 @@ class _HomeScreen extends State<HomeScreen> {
         _onRfwDataChanged,
       );
 
-  Widget get _rfwEventsInspector => ListView.builder(
-        itemCount: _rfwEvents.length,
-        itemBuilder: (context, index) {
-          final event = _rfwEvents[index];
-          final name = event.name;
-          final arguments = event.arguments;
-          return ExpansionTile(
-            title: Text('Event: $name'),
-            children: [Text(_jsonEncoder.convert(arguments))],
-          );
-        },
-      );
-
   Widget get _rfwApp => MouseRegion(
         onHover: _onHover,
-        child: RemoteWidget(
-          runtime: _runtime,
-          data: _data,
-          widget: const FullyQualifiedWidgetName(mainName, 'root'),
-          onEvent: _onRfwEvent,
+        child: Container(
+          decoration: BoxDecoration(border: Border.all()),
+          child: RemoteWidget(
+            runtime: _runtime,
+            data: _data,
+            widget: const FullyQualifiedWidgetName(mainName, 'root'),
+            onEvent: _onRfwEvent,
+          ),
+        ),
+      );
+
+  Widget get _rfwEventsInspector => Container(
+        decoration: BoxDecoration(border: Border.all()),
+        child: ListView.builder(
+          itemCount: _rfwEvents.length,
+          itemBuilder: (context, index) {
+            final event = _rfwEvents[index];
+            final name = event.name;
+            final arguments = event.arguments;
+            return ExpansionTile(
+              title: Text('Event: $name'),
+              children: [Text(_jsonEncoder.convert(arguments))],
+            );
+          },
         ),
       );
 
@@ -273,6 +279,7 @@ class _HomeScreen extends State<HomeScreen> {
         ),
         child: CodeField(
           controller: controller,
+          decoration: BoxDecoration(border: Border.all()),
           textStyle: const TextStyle(fontFamily: 'SourceCode'),
           minLines: null,
           maxLines: null,

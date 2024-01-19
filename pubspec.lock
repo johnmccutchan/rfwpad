@@ -86,14 +86,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
-  flutter_resizable_container:
-    dependency: "direct main"
-    description:
-      name: flutter_resizable_container
-      sha256: "9daf5dcf3fe591c948d582fe617576fe9b27f978e4d38260c422ab237905a0d2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -163,14 +155,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
-  material_design_icons_flutter:
-    dependency: transitive
-    description:
-      name: material_design_icons_flutter
-      sha256: "4c81ebf55b9661d1eb94652884a7b098af63153ea75b9070caedaddfae308e02"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.7296"
   meta:
     dependency: transitive
     description:

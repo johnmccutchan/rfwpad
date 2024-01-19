@@ -34,15 +34,15 @@ class _HomeScreen extends State<HomeScreen> {
     'cities': [
       {
         'name': 'San Francisco',
-        "image": "https://source.unsplash.com/random/500x400/?san+francisco",
+        "image": "https://source.unsplash.com/random/300x300/?san+francisco",
       },
       {
         'name': 'New york',
-        "image": "https://source.unsplash.com/random/500x400/?new+york",
+        "image": "https://source.unsplash.com/random/300x300/?new+york",
       },
       {
         'name': 'Los Angeles',
-        "image": "https://source.unsplash.com/random/500x400/?los+angeles",
+        "image": "https://source.unsplash.com/random/300x300/?los+angeles",
       },
     ],
   };
@@ -92,7 +92,7 @@ class _HomeScreen extends State<HomeScreen> {
       children: [
          CityName(name: args.name),
          Space(),
-         Image(source: args.image, width: 300),
+         Image(source: args.image, width: 300, height: 300),
          Space(),
          LikeButton(city: args.name),
       ],

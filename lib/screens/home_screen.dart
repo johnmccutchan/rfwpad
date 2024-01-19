@@ -50,7 +50,6 @@ class _HomeScreen extends State<HomeScreen> {
     // The "root" widget is specified as the one to render in the build
     // method below.
     widget root = Container(
-      color: 0xFFFFFFFF,
       child: Center(
         child: Column(
           children: [

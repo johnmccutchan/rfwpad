@@ -27,25 +27,32 @@ class _HomeScreen extends State<HomeScreen> {
       LibraryName(<String>['material', 'widgets']);
   static const LibraryName mainName = LibraryName(<String>['main']);
   static const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
-  static const String _initialRfwData = '''
-   {
-    "greet": {
-      "name": "World!"
-     },
-    "list": ["a", "b", "c", "d", "e"]
-   }
-  ''';
+  static const DynamicMap _initialRfwData = <String, Object>{
+    'greet': {
+      'name': 'World',
+    },
+    'cities': [
+      {
+        'name': 'San Francisco',
+        "image": "https://source.unsplash.com/random/500x400/?san+francisco",
+      },
+      {
+        'name': 'New york',
+        "image": "https://source.unsplash.com/random/500x400/?new+york",
+      },
+      {
+        'name': 'Los Angeles',
+        "image": "https://source.unsplash.com/random/500x400/?los+angeles",
+      },
+    ],
+  };
   static const String _initialRfwText = '''
     // The "import" keyword is used to specify dependencies, in this case,
     // the built-in widgets that are added by initState below.
     import core.widgets;
     import material.widgets;
 
-    widget Button = ElevatedButton(
-      child: args.child,
-      onPressed: event "pressed" { }
-    );
-    
+     
     // The "widget" keyword is used to define a new widget constructor.
     // The "root" widget is specified as the one to render in the build
     // method below.
@@ -53,13 +60,48 @@ class _HomeScreen extends State<HomeScreen> {
       child: Center(
         child: Column(
           children: [
-            Text(text: ["Hello, ", data.greet.name, "!"], textDirection: "ltr"),
-            Button(child: Text(text: 'press me')),
-            ...for item in data.list:
-              Text(text: item)
+            Space(),
+            Title(title: ["Hello, ", data.greet.name, "!"]),
+            Title(title: "What's your favorite city?"),
+            Space(),
+            FavoriteCities(cities: data.cities),
           ]
         )
       ),
+    );
+
+    widget Title = Text(
+      text: args.title,
+      style: {
+         fontSize: 24,
+         fontWeight: 'bold',
+      },
+    );
+
+    widget Space = SizedBox(height: 40);
+
+    widget FavoriteCities = Row(
+      mainAxisAlignment: 'spaceBetween',
+      children: [
+        ...for city in args.cities:
+          City(name: city.name, image: city.image), 
+      ],
+    );
+
+    widget City = Column(
+      children: [
+         CityName(name: args.name),
+         Image(source: args.image),
+         Space(),
+         LikeButton(city: args.name),
+      ],
+    );
+
+    widget CityName = Text(text: args.name);
+
+    widget LikeButton = ElevatedButton(
+      child: Text(text: ["I like ", args.city]),
+      onPressed: event "pressed" {"city": args.city }
     );
   ''';
 
@@ -72,7 +114,7 @@ class _HomeScreen extends State<HomeScreen> {
     language: dart,
   );
   final CodeController _rfwDataController = CodeController(
-    text: _initialRfwData,
+    text: _jsonEncoder.convert(_initialRfwData),
     language: dart,
   );
   final List<RfwEvent> _rfwEvents = <RfwEvent>[];
@@ -91,9 +133,9 @@ class _HomeScreen extends State<HomeScreen> {
       ..update(
           mainName, parseLibraryFile(_rfwText, sourceIdentifier: _rfwText));
 
-    _data
-      ..update('greet', <String, Object>{'name': 'World'})
-      ..update('list', <String>['a', 'b', 'c', 'd', 'e']);
+    _initialRfwData.keys.forEach(
+      (key) => _data.update(key, _initialRfwData[key]!),
+    );
   }
 
   @override

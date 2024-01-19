@@ -119,8 +119,6 @@ class _HomeScreen extends State<HomeScreen> {
   );
   final List<RfwEvent> _rfwEvents = <RfwEvent>[];
 
-  Object? _latestRfwError;
-
   SourceRange? _hoverRange;
 
   @override
@@ -144,30 +142,32 @@ class _HomeScreen extends State<HomeScreen> {
     _codeController.dispose();
   }
 
+  Object? _latestRfwTextError;
   void _onRfwTextChanged(String rfwText) {
-    Object? rfwError;
+    Object? rfwTextError;
     try {
       _runtime.update(
           mainName, parseLibraryFile(rfwText, sourceIdentifier: rfwText));
       _rfwText = rfwText;
     } catch (e) {
-      rfwError = e;
+      rfwTextError = e;
     } finally {
       setState(() {
-        _latestRfwError = rfwError;
+        _latestRfwTextError = rfwTextError;
       });
     }
   }
 
+  Object? _latestRfwDataError = null;
   void _onRfwDataChanged(String rfwData) {
-    Object? rfwError;
+    Object? rfwDataError;
     try {
       _data.updateAll(jsonDecode(rfwData));
     } catch (e) {
-      rfwError = e;
+      rfwDataError = e;
     } finally {
       setState(() {
-        _latestRfwError = rfwError;
+        _latestRfwDataError = rfwDataError;
       });
     }
   }
@@ -278,11 +278,13 @@ class _HomeScreen extends State<HomeScreen> {
   Widget get _rfwTextEditor => _textEditor(
         _codeController,
         _onRfwTextChanged,
+        _latestRfwTextError,
       );
 
   Widget get _rfwDataEditor => _textEditor(
         _rfwDataController,
         _onRfwDataChanged,
+        _latestRfwDataError,
       );
 
   Widget get _rfwApp => MouseRegion(
@@ -314,14 +316,22 @@ class _HomeScreen extends State<HomeScreen> {
         ),
       );
 
-  Widget _textEditor(CodeController controller, Function(String) onChanged) =>
+  Widget _textEditor(
+    CodeController controller,
+    Function(String) onChanged,
+    Object? error,
+  ) =>
       CodeTheme(
         data: CodeThemeData(
           styles: _lightMode ? solarizedLightTheme : solarizedDarkTheme,
         ),
         child: CodeField(
           controller: controller,
-          decoration: BoxDecoration(border: Border.all()),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: error == null ? Colors.black : Colors.red,
+            ),
+          ),
           textStyle: const TextStyle(fontFamily: 'SourceCode'),
           minLines: null,
           maxLines: null,

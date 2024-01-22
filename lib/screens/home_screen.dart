@@ -34,15 +34,15 @@ class _HomeScreen extends State<HomeScreen> {
     'cities': [
       {
         'name': 'San Francisco',
-        "image": "https://source.unsplash.com/random/300x300/?san+francisco",
+        "image": "https://source.unsplash.com/random/200x200/?san+francisco",
       },
       {
         'name': 'New york',
-        "image": "https://source.unsplash.com/random/300x300/?new+york",
+        "image": "https://source.unsplash.com/random/200x200/?new+york",
       },
       {
         'name': 'Los Angeles',
-        "image": "https://source.unsplash.com/random/300x300/?los+angeles",
+        "image": "https://source.unsplash.com/random/200x200/?los+angeles",
       },
     ],
   };
@@ -52,7 +52,6 @@ class _HomeScreen extends State<HomeScreen> {
     import core.widgets;
     import material.widgets;
 
-     
     // The "widget" keyword is used to define a new widget constructor.
     // The "root" widget is specified as the one to render in the build
     // method below.
@@ -84,7 +83,7 @@ class _HomeScreen extends State<HomeScreen> {
       mainAxisAlignment: 'center',
       children: [
         ...for city in args.cities:
-          City(name: city.name, image: city.image), 
+          City(name: city.name, image: city.image),
       ],
     );
 
@@ -92,7 +91,7 @@ class _HomeScreen extends State<HomeScreen> {
       children: [
          CityName(name: args.name),
          Space(),
-         Image(source: args.image, width: 300.0, height: 300.0),
+         Image(source: args.image, width: 200.0, height: 200.0),
          Space(),
          LikeButton(city: args.name),
       ],

@@ -30,9 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rfw:
-    path: ../packages/packages/rfw
-  url_launcher:
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -40,8 +37,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   code_text_field: ^1.1.0
   flutter_fancy_tree_view: ^1.4.1
-  flutter_highlight: 
-  highlight:
+  highlight: ^0.7.0
+  flutter_highlight: ^0.7.0
+  rfw: ^1.0.18
+  url_launcher: ^6.2.3
 
 dev_dependencies:
   flutter_test:

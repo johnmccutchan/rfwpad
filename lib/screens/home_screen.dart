@@ -255,9 +255,7 @@ class _HomeScreen extends State<HomeScreen> {
           Padding(
             padding: EdgeInsets.all(10),
             child: OutlinedButton(
-              onPressed: _rfwEvents.isEmpty
-                  ? null
-                  : () => setState(() => _showEvents = !_showEvents),
+              onPressed: () => setState(() => _showEvents = !_showEvents),
               child: _showEvents ? Text('Hide events') : Text('Show events'),
             ),
           ),
@@ -313,18 +311,20 @@ class _HomeScreen extends State<HomeScreen> {
 
   Widget get _rfwEventsInspector => Container(
         decoration: BoxDecoration(border: Border.all()),
-        child: ListView.builder(
-          itemCount: _rfwEvents.length,
-          itemBuilder: (context, index) {
-            final event = _rfwEvents[index];
-            final name = event.name;
-            final arguments = event.arguments;
-            return ExpansionTile(
-              title: Text('Event: $name'),
-              children: [Text(_jsonEncoder.convert(arguments))],
-            );
-          },
-        ),
+        child: _rfwEvents.isEmpty
+            ? Center(child: Text('No events have been fired'))
+            : ListView.builder(
+                itemCount: _rfwEvents.length,
+                itemBuilder: (context, index) {
+                  final event = _rfwEvents[index];
+                  final name = event.name;
+                  final arguments = event.arguments;
+                  return ExpansionTile(
+                    title: Text('Event: $name'),
+                    children: [Text(_jsonEncoder.convert(arguments))],
+                  );
+                },
+              ),
       );
 
   Widget _textEditor(

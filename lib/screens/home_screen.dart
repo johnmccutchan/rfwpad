@@ -73,7 +73,7 @@ class _HomeScreen extends State<HomeScreen> {
     widget Title = Text(
       text: args.title,
       style: {
-         fontSize: 20,
+         fontSize: 20.0,
          fontWeight: 'bold',
       },
     );
@@ -359,7 +359,7 @@ class _HomeScreen extends State<HomeScreen> {
               width: double.infinity,
               child: Padding(
                 padding: EdgeInsets.all(10),
-                child: Text(error.toString()),
+                child: Text(error.toString(), maxLines: 1),
               ),
             ),
         ],

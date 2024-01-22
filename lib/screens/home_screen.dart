@@ -78,7 +78,7 @@ class _HomeScreen extends State<HomeScreen> {
       },
     );
 
-    widget Space = SizedBox(height: 30);
+    widget Space = SizedBox(height: 30.0);
 
     widget FavoriteCities = Row(
       mainAxisAlignment: 'center',

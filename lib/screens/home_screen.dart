@@ -157,7 +157,6 @@ class _HomeScreen extends State<HomeScreen> {
       _rfwText = rfwText;
     } catch (e) {
       rfwTextError = e;
-      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar('rfw text', e));
     } finally {
       setState(() {
         _latestRfwTextError = rfwTextError;
@@ -172,21 +171,12 @@ class _HomeScreen extends State<HomeScreen> {
       _data.updateAll(jsonDecode(rfwData));
     } catch (e) {
       rfwDataError = e;
-      ScaffoldMessenger.of(context).showSnackBar(_errorSnackBar('data', e));
     } finally {
       setState(() {
         _latestRfwDataError = rfwDataError;
       });
     }
   }
-
-  SnackBar _errorSnackBar(String what, Object error) => SnackBar(
-        content: Text(
-          'There was an error parsing the $what: $error',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.red,
-      );
 
   void _onRfwEvent(String name, DynamicMap arguments) {
     setState(() {
@@ -341,22 +331,37 @@ class _HomeScreen extends State<HomeScreen> {
     Function(BuildContext, String) onChanged,
     Object? error,
   ) =>
-      CodeTheme(
-        data: CodeThemeData(
-          styles: _lightMode ? solarizedLightTheme : solarizedDarkTheme,
-        ),
-        child: CodeField(
-          controller: controller,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: error == null ? Colors.black : Colors.red,
+      Column(
+        children: [
+          Expanded(
+            child: CodeTheme(
+              data: CodeThemeData(
+                styles: _lightMode ? solarizedLightTheme : solarizedDarkTheme,
+              ),
+              child: CodeField(
+                controller: controller,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: error == null ? Colors.black : Colors.red,
+                  ),
+                ),
+                textStyle: const TextStyle(fontFamily: 'SourceCode'),
+                minLines: null,
+                maxLines: null,
+                expands: true,
+                onChanged: (value) => onChanged(context, value),
+              ),
             ),
           ),
-          textStyle: const TextStyle(fontFamily: 'SourceCode'),
-          minLines: null,
-          maxLines: null,
-          expands: true,
-          onChanged: (value) => onChanged(context, value),
-        ),
+          if (error != null)
+            Container(
+              color: Colors.red,
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(error.toString()),
+              ),
+            ),
+        ],
       );
 }

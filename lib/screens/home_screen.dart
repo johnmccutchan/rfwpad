@@ -300,11 +300,13 @@ class _HomeScreen extends State<HomeScreen> {
         onHover: _onHover,
         child: Container(
           decoration: BoxDecoration(border: Border.all()),
-          child: RemoteWidget(
-            runtime: _runtime,
-            data: _data,
-            widget: const FullyQualifiedWidgetName(mainName, 'root'),
-            onEvent: _onRfwEvent,
+          child: SingleChildScrollView(
+            child: RemoteWidget(
+              runtime: _runtime,
+              data: _data,
+              widget: const FullyQualifiedWidgetName(mainName, 'root'),
+              onEvent: _onRfwEvent,
+            ),
           ),
         ),
       );

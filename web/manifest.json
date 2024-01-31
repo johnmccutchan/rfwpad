@@ -1,6 +1,6 @@
 {
-    "name": "rfwpg",
-    "short_name": "rfwpg",
+    "name": "rfwpad",
+    "short_name": "rfwpad",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

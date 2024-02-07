@@ -13,115 +13,33 @@ import '../widgets/tree.dart';
 import '../infra/rfw_event.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.toggleTheme});
+  const HomeScreen(
+      {super.key,
+      required this.toggleTheme,
+      required this.builtinLocalWidgetLibraries,
+      required this.builtinRemoteWidgetLibraries,
+      required this.initialRfwTxt,
+      required this.initialData});
 
   final void Function() toggleTheme;
+  final Map<LibraryName, LocalWidgetLibrary> builtinLocalWidgetLibraries;
+  final Map<LibraryName, RemoteWidgetLibrary> builtinRemoteWidgetLibraries;
+  final String initialRfwTxt;
+  final Map<String, Object> initialData;
 
   @override
   State<HomeScreen> createState() => _HomeScreen();
 }
 
 class _HomeScreen extends State<HomeScreen> {
-  static const LibraryName coreName = LibraryName(<String>['core', 'widgets']);
-  static const LibraryName materialName =
-      LibraryName(<String>['material', 'widgets']);
   static const LibraryName mainName = LibraryName(<String>['main']);
   static const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
-  static const DynamicMap _initialRfwData = <String, Object>{
-    'greet': {
-      'name': 'World',
-    },
-    'cities': [
-      {
-        'name': 'San Francisco',
-        "image": "https://source.unsplash.com/random/200x200/?san+francisco",
-      },
-      {
-        'name': 'New york',
-        "image": "https://source.unsplash.com/random/200x200/?new+york",
-      },
-      {
-        'name': 'Los Angeles',
-        "image": "https://source.unsplash.com/random/200x200/?los+angeles",
-      },
-    ],
-  };
-  static const String _initialRfwText = '''
-    // The "import" keyword is used to specify dependencies, in this case,
-    // the built-in widgets that are added by initState below.
-    import core.widgets;
-    import material.widgets;
-
-    // The "widget" keyword is used to define a new widget constructor.
-    // The "root" widget is specified as the one to render in the build
-    // method below.
-    widget root = Container(
-      child: Center(
-        child: Column(
-          children: [
-            Space(),
-            Title(title: ["Hello, ", data.greet.name, "!"]),
-            Title(title: "What's your favorite city?"),
-            Space(),
-            FavoriteCities(cities: data.cities),
-          ]
-        )
-      ),
-    );
-
-    widget Title = Text(
-      text: args.title,
-      style: {
-         fontSize: 20.0,
-         fontWeight: 'bold',
-      },
-    );
-
-    widget Space = SizedBox(height: 30.0);
-
-    widget FavoriteCities = Row(
-      mainAxisAlignment: 'center',
-      children: [
-        ...for city in args.cities:
-          City(name: city.name, image: city.image),
-      ],
-    );
-
-    widget City = Column(
-      children: [
-         CityName(name: args.name),
-         Space(),
-         Image(source: args.image, width: 200.0, height: 200.0),
-         Space(),
-         LikeButton(city: args.name),
-      ],
-    );
-
-    widget CityName = Text(
-      text: args.name,
-      style: {
-        fontSize: 14,
-      },
-    );
-
-    widget LikeButton = ElevatedButton(
-      child: Text(text: ["I like ", args.city]),
-      onPressed: event "pressed" {"city": args.city }
-    );
-  ''';
-
-  String _rfwText = _initialRfwText;
+  String _rfwText = '';
 
   final Runtime _runtime = Runtime();
   final DynamicContent _data = DynamicContent();
-  final CodeController _codeController = CodeController(
-    text: _initialRfwText,
-    language: dart,
-  );
-  final CodeController _rfwDataController = CodeController(
-    text: _jsonEncoder.convert(_initialRfwData),
-    language: dart,
-  );
+  late CodeController _rfwTextController;
+  late CodeController _rfwDataController;
   final List<RfwEvent> _rfwEvents = <RfwEvent>[];
 
   SourceRange? _hoverRange;
@@ -130,21 +48,27 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    _runtime
-      ..update(coreName, createCoreWidgets())
-      ..update(materialName, createMaterialWidgets())
-      ..update(
-          mainName, parseLibraryFile(_rfwText, sourceIdentifier: _rfwText));
+    _rfwText = widget.initialRfwTxt;
+    _rfwTextController = CodeController(text: _rfwText, language: dart);
+    _rfwDataController = CodeController(
+        text: _jsonEncoder.convert(widget.initialData), language: dart);
+    widget.builtinLocalWidgetLibraries.forEach((key, value) {
+      _runtime.update(key, value);
+    });
+    widget.builtinRemoteWidgetLibraries.forEach((key, value) {
+      _runtime.update(key, value);
+    });
 
-    for (final key in _initialRfwData.keys) {
-      _data.update(key, _initialRfwData[key]!);
-    }
+    // Apply changes.
+    _runtime.update(
+        mainName, parseLibraryFile(_rfwText, sourceIdentifier: _rfwText));
+    _data.updateAll(widget.initialData);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _codeController.dispose();
+    _rfwTextController.dispose();
   }
 
   Object? _latestRfwTextError;
@@ -215,7 +139,7 @@ class _HomeScreen extends State<HomeScreen> {
       if (loc != null) {
         setState(() {
           _hoverRange = loc;
-          _codeController.selection = TextSelection(
+          _rfwTextController.selection = TextSelection(
             baseOffset: loc!.start.offset,
             extentOffset: loc!.end.offset,
           );
@@ -235,7 +159,7 @@ class _HomeScreen extends State<HomeScreen> {
     return Scaffold(
       drawer: Drawer(width: 400, child: RFWTreeView(runtime: _runtime)),
       appBar: AppBar(
-        title: Text('rfw dbg'),
+        title: Text('RFW Pad'),
         actions: [
           Padding(
             padding: EdgeInsets.all(10),
@@ -281,7 +205,7 @@ class _HomeScreen extends State<HomeScreen> {
 
   Widget _rfwTextEditor(BuildContext context) => _textEditor(
         context,
-        _codeController,
+        _rfwTextController,
         _onRfwTextChanged,
         _latestRfwTextError,
       );

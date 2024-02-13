@@ -42,8 +42,6 @@ class _HomeScreen extends State<HomeScreen> {
   late CodeController _rfwDataController;
   final List<RfwEvent> _rfwEvents = <RfwEvent>[];
 
-  SourceRange? _hoverRange;
-
   @override
   void initState() {
     super.initState();
@@ -138,10 +136,9 @@ class _HomeScreen extends State<HomeScreen> {
       }
       if (loc != null) {
         setState(() {
-          _hoverRange = loc;
           _rfwTextController.selection = TextSelection(
-            baseOffset: loc!.start.offset,
-            extentOffset: loc!.end.offset,
+            baseOffset: loc.start.offset,
+            extentOffset: loc.end.offset,
           );
         });
       }

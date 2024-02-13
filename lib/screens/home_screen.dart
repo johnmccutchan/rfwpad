@@ -137,8 +137,8 @@ class _HomeScreen extends State<HomeScreen> {
       if (loc != null) {
         setState(() {
           _rfwTextController.selection = TextSelection(
-            baseOffset: loc.start.offset,
-            extentOffset: loc.end.offset,
+            baseOffset: loc!.start.offset,
+            extentOffset: loc!.end.offset,
           );
         });
       }
